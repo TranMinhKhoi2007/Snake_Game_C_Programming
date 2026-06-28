@@ -18,6 +18,8 @@
 #include <windows.h>
 #define cols 15
 #define rows 15
+#define SNAKE_MAX_LEN 170
+#define foods 10
 int x, y, foodX, foodY, gameOver = 0;
 char board[cols * rows];
 
@@ -65,7 +67,6 @@ typedef struct SnakePart
     int x, y;
 } SnakePart;
 
-#define SNAKE_MAX_LEN 170
 struct snake
 {
     int length;
@@ -78,8 +79,10 @@ void Move_snake(int deltaX, int deltaY)
 {
     for (int i = snake.length - 1; i > 0; i--)
     {
+        // Phần thân di chuyển theo
         snake.part[i] = snake.part[i - 1];
     }
+    // Di chuyển đầu rắn
     snake.part[0].x += deltaX;
     snake.part[0].y += deltaY;
 }
@@ -92,6 +95,43 @@ void Draw_snake()
         board[snake.part[i].y * cols + snake.part[i].x] = 'o';
     }
     board[snake.part[0].y * cols + snake.part[0].x] = '0';
+}
+
+
+struct Food 
+{
+    int x,y;
+    int consumed;
+};
+struct Food food[foods];
+
+void Draw_food()
+{
+    for(int i=0;i<foods;i++)
+    {
+        // Nếu thức ăn chưa đc ăn
+        if(!food[i].consumed)
+        {
+            board[food[i].y*cols + food[i].x] = '*';
+        }
+    }
+}
+
+void setUp_food()
+{
+    for(int i=0;i<foods;i++)
+    {
+        food[i].x = 1 + rand() %(cols-2);
+        food[i].y = 1 + rand() %(rows-2);
+        food[i].consumed = 0;
+    }
+}
+
+void setUp_snake()
+{
+    snake.length = 1;
+    snake.part[0].x = 1 + rand() %(cols-2);
+    snake.part[0].y = 1 + rand() %(rows-2);
 }
 
 void Keyboard_input()
@@ -116,15 +156,14 @@ void Keyboard_input()
 
 int main()
 {
-    snake.length = 2;
-    snake.part[0].x = 5;
-    snake.part[0].y = 5;
-    snake.part[1].x = 5;
-    snake.part[1].y = 6;
+    srand(time(0));
+    setUp_snake();
+    setUp_food();
 
     while (!gameOver)
     {
         Draw_board();
+        Draw_food();
         Draw_snake();
         Print_board();
         Keyboard_input();
