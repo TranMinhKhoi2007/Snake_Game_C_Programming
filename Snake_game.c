@@ -53,7 +53,6 @@ void clearScreen(int x, int y)
 
 void Print_board()
 {
-    clearScreen(0, 0);
     for (y = 0; y < rows; y++)
     {
         for (x = 0; x < cols; x++)
@@ -88,49 +87,40 @@ void Move_snake(int deltaX, int deltaY)
     snake.part[0].y += deltaY;
 }
 
-// Vẽ rắn từ đuôi vẽ về index 0 là đầu rắn 
+// Vẽ rắn từ đuôi vẽ về index 0 là đầu rắn
 void Draw_snake()
 {
-    // Nếu tọa độ đầu rắn trùng với viền tức rắn đụng tường => thua
-    if(snake.part[0].x == cols || snake.part[0].y == rows || snake.part[0].y == 0 || snake.part[0].x == 0)
-    {
-        gameOver = 1;
-        printf("Game over!\n");
-        return;
-    }
     for (int i = snake.length - 1; i > 0; i--)
     {
         board[snake.part[i].y * cols + snake.part[i].x] = 'o';
     }
     board[snake.part[0].y * cols + snake.part[0].x] = '0';
 }
-
-
-struct Food 
+struct Food
 {
-    int x,y;
+    int x, y;
     int consumed;
 };
 struct Food food[foods];
 
 void Draw_food()
 {
-    for(int i=0;i<foods;i++)
+    for (int i = 0; i < foods; i++)
     {
         // Nếu thức ăn chưa đc ăn
-        if(!food[i].consumed)
+        if (!food[i].consumed)
         {
-            board[food[i].y*cols + food[i].x] = '*';
+            board[food[i].y * cols + food[i].x] = '*';
         }
     }
 }
 
 void setUp_food()
 {
-    for(int i=0;i<foods;i++)
+    for (int i = 0; i < foods; i++)
     {
-        food[i].x = 1 + rand() %(cols-2);
-        food[i].y = 1 + rand() %(rows-2);
+        food[i].x = 1 + rand() % (cols - 2);
+        food[i].y = 1 + rand() % (rows - 2);
         food[i].consumed = 0;
     }
 }
@@ -138,8 +128,8 @@ void setUp_food()
 void setUp_snake()
 {
     snake.length = 1;
-    snake.part[0].x = 1 + rand() %(cols-2);
-    snake.part[0].y = 1 + rand() %(rows-2);
+    snake.part[0].x = 1 + rand() % (cols - 2);
+    snake.part[0].y = 1 + rand() % (rows - 2);
 }
 
 void Keyboard_input()
@@ -162,6 +152,37 @@ void Keyboard_input()
     }
 }
 
+void Game_rules()
+{
+    for (int i = 0; i < foods; i++)
+    {
+        // Khi rắn ăn thì dài ra
+        if (!food[i].consumed)
+        {
+            if (food[i].x == snake.part[0].x && food[i].y == snake.part[0].y)
+            {
+                food[i].consumed = 1;
+                snake.length++;
+            }
+        }
+    }
+    // Nếu tọa độ đầu rắn trùng với viền tức rắn đụng tường => thua
+    if (snake.part[0].x == cols - 1 || snake.part[0].y == rows - 1 || snake.part[0].y == 0 || snake.part[0].x == 0)
+    {
+        gameOver = 1;
+        return;
+    }
+    // Rắn đụng thân => thua
+    for(int i =1; i<snake.length;i++)
+    {
+        if(snake.part[0].x == snake.part[i].x && snake.part[0].y == snake.part[i].y)
+        {
+            gameOver = 1;
+            return;
+        }
+    }
+}
+
 int main()
 {
     srand(time(0));
@@ -173,9 +194,11 @@ int main()
         Draw_board();
         Draw_food();
         Draw_snake();
+        Game_rules();
+        clearScreen(0, 0);
         Print_board();
-        Keyboard_input();
-        printf("\nScore: %d", snake.length*100);
+        printf("\nScore: %d", snake.length * 100);
+        if(!gameOver) Keyboard_input();
     }
-    
+    printf("\nGame over, final score: %d", snake.length * 100);
 }
