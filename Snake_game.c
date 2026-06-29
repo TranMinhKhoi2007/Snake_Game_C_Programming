@@ -16,6 +16,7 @@
 #include <conio.h>
 #include <stdlib.h>
 #include <windows.h>
+#include <time.h>
 #define cols 15
 #define rows 15
 #define SNAKE_MAX_LEN 170
@@ -90,6 +91,13 @@ void Move_snake(int deltaX, int deltaY)
 // Vẽ rắn từ đuôi vẽ về index 0 là đầu rắn 
 void Draw_snake()
 {
+    // Nếu tọa độ đầu rắn trùng với viền tức rắn đụng tường => thua
+    if(snake.part[0].x == cols || snake.part[0].y == rows || snake.part[0].y == 0 || snake.part[0].x == 0)
+    {
+        gameOver = 1;
+        printf("Game over!\n");
+        return;
+    }
     for (int i = snake.length - 1; i > 0; i--)
     {
         board[snake.part[i].y * cols + snake.part[i].x] = 'o';
@@ -167,5 +175,7 @@ int main()
         Draw_snake();
         Print_board();
         Keyboard_input();
+        printf("\nScore: %d", snake.length*100);
     }
+    
 }
